@@ -1,0 +1,64 @@
+version: "3.8"
+
+services:
+  db:
+    image: postgres:14
+    container_name: postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: clouduser
+      POSTGRES_PASSWORD: cloudpass
+      POSTGRES_DB: cloudnotes
+    ports:
+      - "5433:5432"  # ✅ Changed from 5432 to avoid conflict with EC2
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - cloudnotes_network
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "clouduser"]
+      interval: 10s
+      retries: 5
+      start_period: 20s
+
+  backend:
+    build: ./backend
+    container_name: backend-container
+    restart: always
+    depends_on:
+      db:
+        condition: service_healthy  # ✅ Ensures DB is ready before starting backend
+    environment:
+      DATABASE_URL: "postgresql://clouduser:cloudpass@db:5432/cloudnotes"
+    ports:
+      - "8001:8000"  # ✅ Changed backend port to 8001
+    networks:
+      - cloudnotes_network
+    volumes:
+      - ./backend:/app
+    logging:
+      driver: "json-file"
+
+  frontend:
+    build: ./frontend
+    container_name: frontend-container
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "3001:3000"  # ✅ Changed frontend port to 3001
+    networks:
+      - cloudnotes_network
+    volumes:
+      - ./frontend:/app
+    environment:
+      - REACT_APP_BACKEND_URL=http://backend:8000  # ✅ Uses backend service name inside Docker
+    logging:
+      driver: "json-file"
+
+volumes:
+  postgres_data:
+
+networks:
+  cloudnotes_network:
+    driver: bridge

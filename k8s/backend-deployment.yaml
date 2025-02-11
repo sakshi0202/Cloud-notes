@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend
+  namespace: cloudnotes
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+        - name: backend
+          image: sakshimhaske942/backend-cloudnotes:v1
+          command: ["/bin/sh", "-c", "sleep 3600"]  # Keeps the container running for debugging
+          env:
+            - name: DATABASE_URL
+              value: "postgresql://clouduser:cloudpass@postgres.cloudnotes.svc.cluster.local:5432/cloudnotes"
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend
+  namespace: cloudnotes
+spec:
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: LoadBalancer

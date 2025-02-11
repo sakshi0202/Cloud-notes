@@ -1,0 +1,29 @@
+nohup: ignoring input
+INFO:     Will watch for changes in these directories: ['/home/ubuntu/cloud-notes/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [35565] using WatchFiles
+/home/ubuntu/cloud-notes/backend/venv/lib/python3.10/site-packages/pydantic/_internal/_config.py:345: UserWarning: Valid config keys have changed in V2:
+* 'orm_mode' has been renamed to 'from_attributes'
+  warnings.warn(message, UserWarning)
+INFO:     Started server process [35567]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     182.156.140.38:55110 - "GET /notes/ HTTP/1.1" 200 OK
+INFO:     182.156.140.38:55110 - "GET /notes/ HTTP/1.1" 200 OK
+INFO:     182.156.140.38:55111 - "GET /notes/ HTTP/1.1" 200 OK
+INFO:     182.156.140.38:55111 - "GET /notes/ HTTP/1.1" 200 OK
+INFO:     182.156.140.38:55126 - "GET / HTTP/1.1" 200 OK
+INFO:     182.156.140.38:55126 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     182.156.140.38:55120 - "GET /notes/ HTTP/1.1" 200 OK
+INFO:     182.156.140.38:55120 - "GET /notes/ HTTP/1.1" 200 OK
+INFO:     182.156.140.38:56746 - "GET /notes/ HTTP/1.1" 200 OK
+INFO:     195.178.110.224:36416 - "GET / HTTP/1.0" 200 OK
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+WARNING:  Invalid HTTP request received.
+INFO:     45.58.159.166:40220 - "GET / HTTP/1.1" 200 OK
+INFO:     45.58.159.166:40226 - "GET /login HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     116.198.206.124:37486 - "GET /.env HTTP/1.1" 404 Not Found
+WARNING:  Invalid HTTP request received.
+INFO:     1.40.190.254:42177 - "GET / HTTP/1.0" 200 OK
