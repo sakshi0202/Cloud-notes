@@ -2,56 +2,70 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "sakshi0202/cloudnotes-app"
-        DOCKER_CREDENTIALS_ID = "docker-credentials"
-        K8S_NAMESPACE = "cloudnotes"
+        DOCKERHUB_USERNAME = 'sakshimhaske942'  // DockerHub username
+        BACKEND_IMAGE = 'sakshimhaske942/cloudnotes-backend:latest'
+        FRONTEND_IMAGE = 'sakshimhaske942/cloudnotes-frontend:latest'
     }
 
     stages {
+
         stage('Checkout Code') {
             steps {
                 git branch: 'main', credentialsId: 'github-credentials', url: 'https://github.com/sakshi0202/Cloud-notes.git'
             }
         }
 
-        stage('Build Docker Image') {
+        stage('Build Backend Image') {
             steps {
-                script {
-                    docker.build("${DOCKER_IMAGE}:latest")
+                dir('backend') {
+                    sh 'docker build -t $BACKEND_IMAGE -f Dockerfile .'
                 }
             }
         }
 
-        stage('Push Image to DockerHub') {
+        stage('Build Frontend Image') {
             steps {
-                script {
-                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
-                        docker.image("${DOCKER_IMAGE}:latest").push()
-                    }
+                dir('frontend') {
+                    sh 'docker build -t $FRONTEND_IMAGE -f Dockerfile .'
                 }
             }
         }
 
-        stage('Deploy to Kubernetes') {
+        stage('Push Images to DockerHub') {
             steps {
-                script {
-                    sh """
-                    kubectl apply -f k8s/frontend-deployment.yaml -n ${K8S_NAMESPACE}
-                    kubectl apply -f k8s/backend-deployment.yaml -n ${K8S_NAMESPACE}
-                    kubectl rollout status deployment/frontend -n ${K8S_NAMESPACE}
-                    kubectl rollout status deployment/backend -n ${K8S_NAMESPACE}
-                    """
+                withDockerRegistry([credentialsId: 'dockerhub-credentials', url: '']) {
+                    sh 'docker push $BACKEND_IMAGE'
+                    sh 'docker push $FRONTEND_IMAGE'
                 }
+            }
+        }
+
+        stage('Deploy PostgreSQL Database') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/postgres-pv.yaml
+                kubectl apply -f k8s/postgres-pvc.yaml
+                kubectl apply -f k8s/postgres-deployment.yaml
+                '''
+            }
+        }
+
+        stage('Deploy Backend & Frontend') {
+            steps {
+                sh '''
+                kubectl apply -f k8s/backend-deployment.yaml
+                kubectl apply -f k8s/frontend-deployment.yaml
+                '''
             }
         }
     }
 
     post {
         success {
-            echo '✅ Deployment Successful!'
+            echo "✅ Deployment Successful!"
         }
         failure {
-            echo '❌ Deployment Failed!'
+            echo "❌ Deployment Failed!"
         }
     }
 }
